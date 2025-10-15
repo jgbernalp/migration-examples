@@ -1,0 +1,587 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "2K7J7AeIzz",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Utilization dashboards / Virtual Machines Resources Utilization"
+    },
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "name": "Cluster",
+            "hidden": false
+          },
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "sort": "none",
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "labelName": "cluster",
+              "matchers": [
+                "kubevirt_vm_running_status_last_transition_timestamp_seconds"
+              ]
+            }
+          },
+          "name": "cluster"
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "name": "Namespace",
+            "description": "Filter the Virtual Machine by its Namespace",
+            "hidden": false
+          },
+          "defaultValue": [
+            "$__all"
+          ],
+          "allowAllValue": true,
+          "allowMultiple": true,
+          "customAllValue": ".*",
+          "sort": "none",
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "labelName": "namespace",
+              "matchers": [
+                "kubevirt_vm_running_status_last_transition_timestamp_seconds{cluster=~\"$cluster\"}"
+              ]
+            }
+          },
+          "name": "namespace"
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "name": "VM Name",
+            "description": "Filter the Virtual Machine by its name",
+            "hidden": false
+          },
+          "defaultValue": [
+            "$__all"
+          ],
+          "allowAllValue": true,
+          "allowMultiple": true,
+          "customAllValue": ".*",
+          "sort": "alphabetical-asc",
+          "plugin": {
+            "kind": "PrometheusPromQLVariable",
+            "spec": {
+              "expr": "query_result(sum by (name)(kubevirt_vm_running_status_last_transition_timestamp_seconds{cluster=~\"$cluster\", namespace=~\"$namespace\"} ))\n",
+              "labelName": "migration_from_grafana_not_supported"
+            }
+          },
+          "name": "name"
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "name": "Status",
+            "hidden": false
+          },
+          "defaultValue": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info)))",
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "StaticListVariable",
+            "spec": {
+              "values": [
+                {
+                  "label": "All",
+                  "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info)))"
+                },
+                {
+                  "label": "stopped",
+                  "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info{status_group=\"non_running\"}\u003e0)))"
+                },
+                {
+                  "label": "starting",
+                  "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info{status_group=\"starting\"} \u003e 0)))"
+                },
+                {
+                  "label": "migrating",
+                  "value": "on(cluster, name, namespace) group_left() (0*(sum by (cluster, namespace, name)(kubevirt_vm_info{status_group=\"migrating\"}\u003e0)))"
+                },
+                {
+                  "label": "error",
+                  "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info{status_group=\"error\"}\u003e0)))"
+                },
+                {
+                  "label": "running",
+                  "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info{status_group=\"running\"}\u003e0)))"
+                }
+              ]
+            }
+          },
+          "name": "status"
+        }
+      }
+    ],
+    "panels": {
+      "0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Virtual Machines Utilization",
+            "description": "The dashboard is showing the Virtual Machines utilization."
+          },
+          "plugin": {
+            "kind": "Table",
+            "spec": {
+              "columnSettings": [
+                {
+                  "hide": true,
+                  "name": "timestamp"
+                },
+                {
+                  "header": "Cluster",
+                  "name": "cluster"
+                },
+                {
+                  "header": "Namespace",
+                  "name": "namespace"
+                },
+                {
+                  "header": "VM Name",
+                  "name": "name"
+                },
+                {
+                  "header": "Status",
+                  "hide": false,
+                  "name": "status"
+                },
+                {
+                  "header": "Guest Agent",
+                  "name": "Value #R"
+                },
+                {
+                  "header": "Allocated vCPU",
+                  "hide": true,
+                  "name": "Value #K"
+                },
+                {
+                  "header": "CPU Usage",
+                  "hide": true,
+                  "name": "Value #B"
+                },
+                {
+                  "header": "CPU Usage (%)",
+                  "name": "Value #H"
+                },
+                {
+                  "header": "CPU Delay Time",
+                  "hide": true,
+                  "name": "Value #G"
+                },
+                {
+                  "header": "CPU Delay (%)",
+                  "name": "Value #I"
+                },
+                {
+                  "header": "Allocated Memory",
+                  "hide": true,
+                  "name": "Value #L"
+                },
+                {
+                  "header": "Memory Usage",
+                  "hide": true,
+                  "name": "Value #C"
+                },
+                {
+                  "header": "Memory Usage (%)",
+                  "name": "Value #J"
+                },
+                {
+                  "header": "Memory Swap Traffic",
+                  "name": "Value #N"
+                },
+                {
+                  "header": "CPU I/O Wait",
+                  "hide": false,
+                  "name": "Value #M"
+                },
+                {
+                  "header": "Storage Traffic",
+                  "name": "Value #E"
+                },
+                {
+                  "header": "Storage IOPs",
+                  "name": "Value #F"
+                },
+                {
+                  "header": "Network Traffic",
+                  "name": "Value #D"
+                },
+                {
+                  "header": "",
+                  "hide": true,
+                  "name": "Value #A"
+                },
+                {
+                  "header": "File System Capacity",
+                  "hide": true,
+                  "name": "Value #O"
+                },
+                {
+                  "header": "File System Usage",
+                  "hide": true,
+                  "name": "Value #P"
+                },
+                {
+                  "header": "File System Usage (Max %)",
+                  "name": "Value #Q"
+                },
+                {
+                  "name": "CPU Usage"
+                },
+                {
+                  "name": "Memory Usage"
+                },
+                {
+                  "name": "Network Usage  - Transmit"
+                },
+                {
+                  "name": "Network Usage - Receive"
+                },
+                {
+                  "name": "CPU Delay Time"
+                },
+                {
+                  "name": "CPU Usage (%)",
+                  "width": 111
+                },
+                {
+                  "name": "CPU Delay (%)",
+                  "width": 113
+                },
+                {
+                  "name": "Memory Usage (%)",
+                  "width": 141
+                },
+                {
+                  "name": "Allocated Memory"
+                },
+                {
+                  "name": "CPU I/O Wait",
+                  "width": 125
+                },
+                {
+                  "name": "Memory Swap Traffic",
+                  "width": 159
+                },
+                {
+                  "name": "Storage Traffic",
+                  "width": 119
+                },
+                {
+                  "name": "Network Traffic",
+                  "width": 122
+                },
+                {
+                  "name": "Status",
+                  "width": 96
+                },
+                {
+                  "name": "File System Capacity"
+                },
+                {
+                  "name": "File System Usage"
+                },
+                {
+                  "name": "File System Usage (Max %)",
+                  "width": 195
+                },
+                {
+                  "name": "VM Name"
+                },
+                {
+                  "name": "Storage IOPs",
+                  "width": 106
+                },
+                {
+                  "name": "Guest Agent",
+                  "width": 115
+                }
+              ],
+              "transforms": [
+                {
+                  "kind": "MergeSeries",
+                  "spec": {}
+                }
+              ]
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by (cluster, namespace, name, status) (\n  label_replace(kubevirt_vm_running_status_last_transition_timestamp_seconds{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\"} \u003e 0, \"status\", \"running\", \"__name__\", \".*\") \n  or label_replace(kubevirt_vm_non_running_status_last_transition_timestamp_seconds{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\"} \u003e 0, \"status\", \"stopped\", \"__name__\", \".*\")\n  or label_replace(kubevirt_vm_error_status_last_transition_timestamp_seconds{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\"} \u003e 0, \"status\", \"error\", \"__name__\", \".*\") \n  or label_replace(kubevirt_vm_starting_status_last_transition_timestamp_seconds{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\"} \u003e 0, \"status\", \"starting\", \"__name__\", \".*\") \n  or label_replace(kubevirt_vm_migrating_status_last_transition_timestamp_seconds{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\"} \u003e 0, \"status\", \"migrating\", \"__name__\", \".*\")\n)+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by (cluster,namespace,name)(rate(kubevirt_vmi_cpu_usage_seconds_total{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\"}[$__range]))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "(\n  sum by (cluster, namespace, name) (\n  kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"cores\", source=~\"default|domain\"}\n  * ignoring (unit)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"sockets\", source=~\"default|domain\"})\n  * ignoring (unit)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"threads\", source=~\"default|domain\"})\n  ) or\n  sum by (cluster, namespace, name) (\n  kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"cores\", source=~\"default|domain\"}\n  * ignoring (unit)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"sockets\", source=~\"default|domain\"})\n  )\n   or\n  sum by (cluster, namespace, name) (\n  kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"cores\", source=~\"default|domain\"}\n  )\n)+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "(\n  sum by (cluster,namespace,name)(\n  rate(kubevirt_vmi_cpu_usage_seconds_total{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\"}[$__range])\n  )\u003e0\n)\n/\n(\n  sum by (cluster, namespace, name) (\n  (kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"cores\", source=~\"default|domain\"})\n  * ignoring (unit)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"sockets\", source=~\"default|domain\"})\n  * ignoring (unit)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"threads\", source=~\"default|domain\"})\n  ) or\n  sum by (cluster, namespace, name) (\n  (kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"cores\", source=~\"default|domain\"})\n  * ignoring (unit)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"sockets\", source=~\"default|domain\"})\n)\n)+ ${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "avg by (cluster,namespace,name) (\navg_over_time(kubevirt_vmi_memory_available_bytes{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]) - avg_over_time(kubevirt_vmi_memory_unused_bytes{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]) - avg_over_time(kubevirt_vmi_memory_cached_bytes{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range])\n)+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by(cluster, namespace, name)(max by (cluster, namespace, name)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\", resource=\"memory\"}))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "(\n  avg by (cluster, namespace, name) (\n    avg_over_time(kubevirt_vmi_memory_available_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\"}[$__range])\n    - avg_over_time(kubevirt_vmi_memory_unused_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\"}[$__range])\n    - avg_over_time(kubevirt_vmi_memory_cached_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\"}[$__range])\n  )+${status:raw}\n)\n/\n(\n  sum by (cluster, namespace, name) (\n    max by (cluster, namespace, name)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\", resource=\"memory\"})\n  )+${status:raw}\n)",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by (cluster,namespace,name)(rate(kubevirt_vmi_network_transmit_bytes_total{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\"}[$__range]) + rate(kubevirt_vmi_network_receive_bytes_total{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\"}[$__range]))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by (cluster, namespace, name)(rate(kubevirt_vmi_storage_read_traffic_bytes_total{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]) + rate(kubevirt_vmi_storage_write_traffic_bytes_total{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by (cluster,namespace,name) (rate(kubevirt_vmi_storage_iops_read_total{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]) + rate(kubevirt_vmi_storage_iops_write_total{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by (cluster,namespace,name) (rate(kubevirt_vmi_vcpu_delay_seconds_total{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "(\n  sum by (name, namespace, cluster)(\n    rate(kubevirt_vmi_vcpu_delay_seconds_total{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\"}[$__range])\n  )\u003e0\n)\n/\n(\n  sum by (cluster, namespace, name) (\n  (kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"cores\", source=~\"default|domain\"})\n  * ignoring (unit)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"sockets\", source=~\"default|domain\"})\n  * ignoring (unit)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"threads\", source=~\"default|domain\"})\n  ) or\n  sum by (cluster, namespace, name) (\n  (kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"cores\", source=~\"default|domain\"})\n  * ignoring (unit)(kubevirt_vm_resource_requests{cluster=~\"$cluster\", name=~\"$name\", namespace=~\"$namespace\", resource=\"cpu\", unit=\"sockets\", source=~\"default|domain\"})\n)\n)+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by (cluster,namespace,name)(rate(kubevirt_vmi_vcpu_wait_seconds_total{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by (cluster,namespace,name) (avg_over_time(kubevirt_vmi_memory_swap_in_traffic_bytes{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]) + avg_over_time(kubevirt_vmi_memory_swap_out_traffic_bytes{cluster=~\"$cluster\",namespace=~\"$namespace\", name=~\"$name\"}[$__range]))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "avg by (cluster, namespace, name) (avg_over_time(kubevirt_vmi_filesystem_capacity_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\"}[$__range]))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "avg by (cluster, namespace, name) (avg_over_time(kubevirt_vmi_filesystem_used_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\"}[$__range]))+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "topk(1,\n(max by (cluster, namespace, name, disk_name) (\n  avg_over_time(kubevirt_vmi_filesystem_used_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\"}[$__range])\n))\n/\n(max by (cluster, namespace, name, disk_name) (\n  avg_over_time(kubevirt_vmi_filesystem_capacity_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\"}[$__range])\n))+${status:raw}\n) by (cluster, namespace, name)",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "minStep": "",
+                    "query": "sum by (cluster, namespace, name)(kubevirt_vmi_memory_available_bytes{cluster=~\"$cluster\", namespace=~\"$namespace\", name=~\"$name\"}*0+1)+${status:raw}",
+                    "seriesNameFormat": ""
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 20,
+              "content": {
+                "$ref": "#/spec/panels/0"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
+  }
+}
