@@ -12,7 +12,7 @@ This directory contains examples of how to use Perses and Percli to migrate from
 1. Install Percli by following the [docs](https://perses.dev/perses/docs/cli/)
 2. Login to your Perses instance using Percli:
    ```bash
-   percli login http://localhost:8080
+   percli login http://localhost:8080 -u admin -p password
    ```
 3. Run the migration command:
    ```bash
